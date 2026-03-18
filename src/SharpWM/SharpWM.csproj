@@ -2,6 +2,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpWM.Core\SharpWM.Core.csproj" />
+    <ProjectReference Include="..\SharpWM.Config\SharpWM.Config.csproj" />
+    <ProjectReference Include="..\SharpWM.Platform\SharpWM.Platform.csproj" />
   </ItemGroup>
 
   <ItemGroup>
