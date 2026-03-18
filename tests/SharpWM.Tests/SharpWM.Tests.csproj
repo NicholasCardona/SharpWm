@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SharpWM.Common\SharpWM.Common.csproj" />
     <ProjectReference Include="..\..\src\SharpWM.Core\SharpWM.Core.csproj" />
+    <ProjectReference Include="..\..\src\SharpWM.Config\SharpWM.Config.csproj" />
   </ItemGroup>
 
 </Project>
