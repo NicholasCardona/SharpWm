@@ -1,0 +1,10 @@
+EnumDisplayMonitors
+GetMonitorInfo
+SetWindowPos
+GetWindowRect
+GetWindowTextW
+IsWindowVisible
+IsIconic
+SetForegroundWindow
+RegisterHotKey
+UnregisterHotKey

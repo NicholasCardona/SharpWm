@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SharpWM.Common/SharpWM.Common.csproj" />
+    <Project Path="src/SharpWM.Config/SharpWM.Config.csproj" />
+    <Project Path="src/SharpWM.Core/SharpWM.Core.csproj" />
+    <Project Path="src/SharpWM.Platform/SharpWM.Platform.csproj" />
+    <Project Path="src/SharpWM/SharpWM.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SharpWM.Tests/SharpWM.Tests.csproj" />
+  </Folder>
+</Solution>
