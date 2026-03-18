@@ -15,8 +15,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  
+ 
   <ItemGroup>
     <ProjectReference Include="..\SharpWM.Common\SharpWM.Common.csproj" />
-  </ItemGroup> 
+  </ItemGroup>
 </Project>
