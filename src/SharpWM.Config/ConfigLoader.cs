@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -45,7 +46,7 @@ public static class ConfigLoader
         {
             WriteDefaultConfig(path);
         }
-
+        Console.WriteLine($"[SharpWM] Configurazione caricata. {path}");
         return Load(path);
     }
 
@@ -53,6 +54,7 @@ public static class ConfigLoader
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, DefaultConfig);
+        Console.WriteLine($"Default configuration not found, created: {path}\\{DefaultConfig}");
     }
 
     private const string DefaultConfig = """

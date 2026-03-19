@@ -41,9 +41,24 @@ catch (Exception ex)
     return 1;
 }
 
-// ── 4. CommandDispatcher ─────────────────────────────────────────────────────
+// ── 4. TilingEngine e CommandDispatcher ──────────────────────────────────────
 
-var dispatcher = new CommandDispatcher(state);
+var tilingEngine = new TilingEngine(config.Gaps.Inner, config.Gaps.Outer);
+var dispatcher   = new CommandDispatcher(state);
+
+// Applica il tiling su tutti i monitor
+void ApplyTiling()
+{
+    foreach (var monitor in state.AllMonitors)
+    {
+        var ws = monitor.ActiveWorkspace;
+        if (ws is null) continue;
+
+        var layout = tilingEngine.Calculate(ws, monitor.Bounds);
+        foreach (var (window, rect) in layout)
+            WindowService.SetWindowBounds(window.Handle, rect);
+    }
+}
 
 // ── 5. Keybinding ────────────────────────────────────────────────────────────
 
@@ -61,10 +76,12 @@ foreach (var kb in config.Keybindings)
         {
             try
             {
-                var cmd = CommandParser.Parse(commandStr);
+                var cmd    = CommandParser.Parse(commandStr);
                 var result = dispatcher.Dispatch(cmd);
                 if (!result.Success)
                     Console.Error.WriteLine($"[SharpWM] Comando fallito: {result.Error}");
+                else
+                    ApplyTiling();
             }
             catch (Exception ex)
             {
@@ -79,9 +96,63 @@ foreach (var kb in config.Keybindings)
 }
 
 Console.WriteLine($"[SharpWM] {config.Keybindings.Count} keybinding registrati.");
+
+// ── 6. WinEventHook ───────────────────────────────────────────────────────────
+
+using var winEvents = new WinEventHook();
+
+winEvents.OnWindowEvent += args =>
+{
+    switch (args.Event)
+    {
+        case WinEvent.WindowCreated:
+            // Ignora finestre non gestibili (toolbar, popup, ecc.)
+            if (!WindowService.IsManageable(args.Handle)) break;
+
+            var activeWs = state.AllMonitors
+                .Select(m => m.ActiveWorkspace)
+                .FirstOrDefault(ws => ws is not null);
+
+            if (activeWs is null) break;
+
+            // Evita duplicati
+            if (state.FindWindow(args.Handle) is not null) break;
+
+            var title = WindowService.GetWindowTitle(args.Handle);
+            activeWs.AddChild(new WindowContainer
+            {
+                Handle = args.Handle,
+                Title  = title
+            });
+
+            Console.WriteLine($"[SharpWM] Finestra aggiunta: '{title}' ({args.Handle})");
+            ApplyTiling();
+            break;
+
+        case WinEvent.WindowDestroyed:
+            var existing = state.FindWindow(args.Handle);
+            if (existing is null) break;
+
+            existing.Parent?.RemoveChild(existing);
+            if (state.FocusedWindow?.Handle == args.Handle)
+                state.SetFocus(null);
+
+            Console.WriteLine($"[SharpWM] Finestra rimossa: ({args.Handle})");
+            ApplyTiling();
+            break;
+
+        case WinEvent.WindowFocused:
+            var focused = state.FindWindow(args.Handle);
+            if (focused is not null)
+                state.SetFocus(focused);
+            break;
+    }
+};
+
+winEvents.Install();
 Console.WriteLine("[SharpWM] In esecuzione. Premi Ctrl+C per uscire.");
 
-// ── 6. Message loop ──────────────────────────────────────────────────────────
+// ── 7. Message loop ───────────────────────────────────────────────────────────
 
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
